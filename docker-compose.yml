@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ecommerce-postgres
+    environment:
+      POSTGRES_DB: Ecommerce
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "2001"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d Ecommerce"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  productservice:
+    build: .
+    container_name: product-service
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/Ecommerce
+      DB_USERNAME: postgres
+      DB_PASSWORD: "2001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
