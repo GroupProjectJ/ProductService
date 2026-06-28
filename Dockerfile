@@ -3,12 +3,13 @@ FROM eclipse-temurin:21-jdk AS builder
 WORKDIR /app
 
 # Copy Maven wrapper and pom first so dependency layer is cached separately
-COPY .mvn/ .mvn/
+COPY .mvn .mvn/
 COPY mvnw pom.xml ./
+RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline -q
 
 # Copy source and package (skip tests — they use H2, no DB needed at build time)
-COPY src/ src/
+COPY src src/
 RUN ./mvnw package -DskipTests -q
 
 # ---- Stage 2: Run ----
